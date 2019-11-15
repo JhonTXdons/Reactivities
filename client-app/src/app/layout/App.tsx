@@ -1,6 +1,4 @@
 import React, {useState, useEffect, Fragment}from 'react';
-import logo from './logo.svg';
-
 
 import axios from 'axios';
 import { Header, Icon, List, Container } from 'semantic-ui-react'
@@ -14,33 +12,69 @@ interface IState{
 
 const App = () =>{
   const [activities, setActivities] = useState<IActivity[]>([]);
-  const [selectedActivity, setSelecetedActivity] = useState<IActivity | null>(null);
+  const [selectedActivity, setSelectedActivity] = useState<IActivity | null>(null);
+  const [editMode, setEditMode] = useState(false);
+
 
   const handleSelectActivity = (id: string) =>{
-    setSelecetedActivity(activities.filter(a => a.id === id)[0])
+    setSelectedActivity(activities.filter(a => a.id === id)[0]);
+    setEditMode(false);
+  }
+
+  const handleOpenCreateForm = () => {
+    setSelectedActivity(null);
+    setEditMode(true);
+  }
+
+  //Gestisce la creazione di una Nuova attività
+  const handleCreateActivity = (activity: IActivity) => { 
+    setActivities([...activities, activity])
+    setSelectedActivity(activity);
+    setEditMode(false);
+  }
+
+  //Gestisce la modifica dell'attività selezionata
+  const handleEditActivity = (activity: IActivity) => { 
+    setActivities([...activities.filter(a => a.id !== activity.id), activity])
+    setSelectedActivity(activity);
+    setEditMode(false);
+  }
+
+  //Gestisce l'eliminazione della Attività selezionata
+  const handleDeleteActivity = (id: string) => {
+    setActivities([...activities.filter(a => a.id !== id)])
   }
 
   useEffect(()=>{
     axios.get<IActivity[]>('http://localhost:5000/api/activities').then((response)=>{
-     // console.log(response);
-      setActivities(response.data)
+      let activities: IActivity[] = [];
+      response.data.forEach(activity => {
+        activity.date = activity.date.split('.')[0];
+        activities.push(activity);
+      })
+      setActivities(activities)
       });
     }, []);
   
     return (
       <Fragment>
-        <NavBar/>
+        <NavBar openCreateForm ={handleOpenCreateForm}/>
         <Container style={{marginTop: '7em'}}>
           <List>
             <ActivityDasboard 
             activities={activities} 
             selectActivity={handleSelectActivity}
-            selectedActivity={selectedActivity}/>
+            selectedActivity={selectedActivity}
+            editMode={editMode}
+            setEditMode={setEditMode}
+            setSelectedActivity={setSelectedActivity}
+            createActivity={handleCreateActivity}
+            editActivity={handleEditActivity}
+            deleteActivity={handleDeleteActivity}/>
           </List>       
-        </Container>
+        </Container> 
       </Fragment>
     );
-  //}
 }
   
 
