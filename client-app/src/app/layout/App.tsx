@@ -1,10 +1,11 @@
 import React, {useState, useEffect, Fragment}from 'react';
 
-import axios from 'axios';
-import { Header, Icon, List, Container } from 'semantic-ui-react'
+import {List, Container } from 'semantic-ui-react'
 import { IActivity } from '../models/activity';
 import NavBar from '../../features/nav/NavBar';
 import ActivityDasboard from '../../features/activities/dashboard/ActivityDasboard';
+import agent from '../api/agent';
+import LoadingComponent from './LoadingComponent';
 
 interface IState{
   activities: IActivity[];
@@ -14,6 +15,7 @@ const App = () =>{
   const [activities, setActivities] = useState<IActivity[]>([]);
   const [selectedActivity, setSelectedActivity] = useState<IActivity | null>(null);
   const [editMode, setEditMode] = useState(false);
+  const [loading, setLoading] = useState(true);
 
 
   const handleSelectActivity = (id: string) =>{
@@ -28,34 +30,50 @@ const App = () =>{
 
   //Gestisce la creazione di una Nuova attività
   const handleCreateActivity = (activity: IActivity) => { 
-    setActivities([...activities, activity])
-    setSelectedActivity(activity);
-    setEditMode(false);
+    agent.Activities.create(activity).then(()=> {
+      setActivities([...activities, activity])
+      setSelectedActivity(activity);
+      setEditMode(false);
+    }).catch(function (error) {
+      console.log(error);
+  });
   }
 
   //Gestisce la modifica dell'attività selezionata
   const handleEditActivity = (activity: IActivity) => { 
+    agent.Activities.update(activity).then(()=> {
     setActivities([...activities.filter(a => a.id !== activity.id), activity])
     setSelectedActivity(activity);
     setEditMode(false);
+    })
+  .catch(function (error) {
+      console.log(error);
+  });
   }
 
   //Gestisce l'eliminazione della Attività selezionata
   const handleDeleteActivity = (id: string) => {
+    agent.Activities.delete(id).then(()=> {
     setActivities([...activities.filter(a => a.id !== id)])
+    }).catch(function (error) {
+      console.log(error);
+  })
   }
 
   useEffect(()=>{
-    axios.get<IActivity[]>('http://localhost:5000/api/activities').then((response)=>{
-      let activities: IActivity[] = [];
-      response.data.forEach(activity => {
-        activity.date = activity.date.split('.')[0];
-        activities.push(activity);
-      })
-      setActivities(activities)
-      });
+    agent.Activities.list()
+      .then((response)=>{
+        let activities: IActivity[] = [];
+        response.forEach(activity => {
+          activity.date = activity.date.split('.')[0];
+          activities.push(activity);
+        })
+        setActivities(activities)
+      }).then(()=> setLoading(false));
     }, []);
   
+    if (loading) return <LoadingComponent content ='Loading Activities...'/>
+
     return (
       <Fragment>
         <NavBar openCreateForm ={handleOpenCreateForm}/>
