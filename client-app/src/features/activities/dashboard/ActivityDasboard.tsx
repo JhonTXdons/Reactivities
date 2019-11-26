@@ -35,14 +35,13 @@ const ActivityDasboard: React.FC<IProps> = ({
     return (
         <Grid>
             <Grid.Column width ={10}>
-                <ActivityList activities={activities} 
-                              selectActivity={selectActivity} 
+                <ActivityList 
                               deleteActivity={deleteActivity} 
                               submitting = {submitting}
                               target={target}/>
             </Grid.Column>
             <Grid.Column width={6}>
-                {selectedActivity && !editMode && (<ActivityDetails activity={selectedActivity} setEditMode ={setEditMode} setSelectedActivity={setSelectedActivity}/>)}               
+                {selectedActivity && !editMode && (<ActivityDetails  setEditMode ={setEditMode} setSelectedActivity={setSelectedActivity}/>)}               
                 {editMode && (<ActivityForm key={ selectedActivity && selectedActivity.id || 0} setEditMode ={setEditMode} 
                                             activity={selectedActivity!} 
                                             createActivity={createActivity} 
