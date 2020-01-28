@@ -16,48 +16,8 @@ interface IState{
 const App = () =>{
   const activityStore = useContext(ActivityStore);
   const [activities, setActivities] = useState<IActivity[]>([]);
-  const [selectedActivity, setSelectedActivity] = useState<IActivity | null>(null);
-  const [editMode, setEditMode] = useState(false);
-  const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [target, setTarget] = useState('');
-
-
-  const handleSelectActivity = (id: string) =>{
-    setSelectedActivity(activities.filter(a => a.id === id)[0]);
-    setEditMode(false);
-  }
-
-  const handleOpenCreateForm = () => {
-    setSelectedActivity(null);
-    setEditMode(true);
-  }
-
-  //Gestisce la creazione di una Nuova attività
-  const handleCreateActivity = (activity: IActivity) => { 
-    setSubmitting(true);
-    agent.Activities.create(activity).then(()=> {
-      setActivities([...activities, activity])
-      setSelectedActivity(activity);
-      setEditMode(false);
-    }).then(() => setSubmitting(false)).catch(function (error) {
-      console.log(error);
-  });
-  }
-
-  //Gestisce la modifica dell'attività selezionata
-  const handleEditActivity = (activity: IActivity) => { 
-    setSubmitting(true);
-    agent.Activities.update(activity).then(()=> {
-    setActivities([...activities.filter(a => a.id !== activity.id), activity])
-    setSelectedActivity(activity);
-    setEditMode(false);
-    })
-    .then(() => setSubmitting(false))
-    .catch(function (error) {
-      console.log(error);
-  });
-  }
 
   //Gestisce l'eliminazione della Attività selezionata
   const handleDeleteActivity = (event: SyntheticEvent<HTMLButtonElement>,id: string) => {
@@ -80,16 +40,10 @@ const App = () =>{
 
     return (
       <Fragment>
-        <NavBar openCreateForm ={handleOpenCreateForm}/>
+        <NavBar/>
         <Container style={{marginTop: '7em'}}>
           <List>
             <ActivityDasboard
-            activities={activityStore.activities} 
-            selectActivity={handleSelectActivity}
-            setEditMode={setEditMode}
-            setSelectedActivity={setSelectedActivity}
-            createActivity={handleCreateActivity}
-            editActivity={handleEditActivity}
             deleteActivity={handleDeleteActivity}
             submitting = {submitting}
             target = {target}/>
