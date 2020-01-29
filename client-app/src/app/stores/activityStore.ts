@@ -4,7 +4,7 @@ import { IActivity } from '../models/activity';
 import agent from '../api/agent';
 
 configure({enforceActions: 'always'});
-
+//riga per commit
 class ActivityStore{
     @observable activityRegistry = new Map();
     @observable activities: IActivity[] = [];
